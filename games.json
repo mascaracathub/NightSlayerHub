@@ -1,0 +1,14 @@
+{
+  "games": [
+    {
+      "name": "BloxFruit",
+      "id": 994732206,
+      "link": "https://yourlink/BloxFruit.lua"
+    },
+    {
+      "name": "Arsenal",
+      "id": 286090429,
+      "link": "https://yourlink/Arsenal.lua"
+    }
+  ]
+}
