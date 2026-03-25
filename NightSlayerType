@@ -1,0 +1,74 @@
+repeat task.wait() until game:IsLoaded()
+
+local HttpService = game:GetService("HttpService")
+local Players = game:GetService("Players")
+local LocalPlayer = Players.LocalPlayer
+
+local GITHUB_URL = "https://raw.githubusercontent.com/mascaracathub/NightSlayerType/main/games.json"
+
+--// Backup nếu GitHub chết
+local BackupGames = {
+    ["99NightsintheForest"] = { id = 79546208627805, link = "https://raw.githubusercontent.com/mascaracathub/Test-Script/refs/heads/main/Full_VetNam.lua" },
+    ["BrookhavenRP"] = { id = 4924922222, link = "https://raw.githubusercontent.com/mascaracathub/Test-Script/refs/heads/main/BrookHave.lua.txt" },
+    ["Doors"] = { id = 6516141723, link = "https://raw.githubusercontent.com/mascaracathub/Test-Script/refs/heads/main/DOORS-CHAOS-MODE-Night-Slayer-Hub-108631" }
+}
+
+local function FetchGames()
+    local success, response = pcall(function()
+        return game:HttpGet(GITHUB_URL)
+    end)
+
+    if success then
+        local decoded = HttpService:JSONDecode(response)
+        return decoded.games
+    else
+        warn("[Night Slayer Hub] Không fetch được GitHub, dùng backup")
+        return nil
+    end
+end
+
+local function BuildGameTable(data)
+    local Games = {}
+
+    for _, gameData in ipairs(data) do
+        Games[gameData.name] = {
+            id = gameData.id,
+            link = gameData.link
+        }
+    end
+
+    return Games
+end
+
+local function DetectGame(Games)
+    for name, data in pairs(Games) do
+        if game.PlaceId == data.id or game.GameId == data.id then
+            return name, data
+        end
+    end
+end
+
+local function LoadScript(name, data)
+    print("[Night Slayer Hub] Loading:", name)
+
+    local success, err = pcall(function()
+        loadstring(game:HttpGet(data.link, true))()
+    end)
+
+    if not success then
+        warn("[Night Slayer Hub] Load lỗi:", err)
+    else
+        print("[Night Slayer Hub] Loaded:", name)
+    end
+end
+
+local fetched = FetchGames()
+local Games = fetched and BuildGameTable(fetched) or BackupGames
+
+local name, data = DetectGame(Games)
+
+if name then
+    LoadScript(name, data)
+else
+    LocalPlayer:Kick("Game chưa được hỗ trợ (Auto Fetch)")
+end
